@@ -5,3 +5,21 @@
 #
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
+
+Post.destroy_all
+
+data = {
+  author: "Elisha Friedman",
+  authorId: 8,
+  originId: 4,
+  likes: 728,
+  popularity: 0.88,
+  reads: 19645,
+  tags: [
+    "science",
+    "design",
+    "tech"
+  ]
+}
+
+Post.create(data)
