@@ -9,17 +9,26 @@ class ServerController < ApplicationController
   # if we wanted to cache our results, we would need to save the final result for any given uri... add a new model, CachedSearches
   # CachedSearches have-many posts. Before external query, we check CachedSearches
   def posts
+
     begin
       url = request.original_url
       uri = URI.parse(url)
       raise NoMethodError unless queries = CGI.parse(uri.query)
     rescue
-      return json_response({"error": "queries must be provided. Try: /api/posts?tags=tech&sortBy=likes"}, 400)
+      return json_response({"error": "Queries must be provided. Try: /api/posts?tags=tech&sortBy=likes"}, 400)
     end
     
     tags = queries["tags"] || []
     sort_by = queries["sortBy"].first || "id"
     direction = queries["direction"].first || "asc"
+
+    # At this point, we can check if this search has been cached
+    # We'll need to look through the DB of cached search terms and make a match on all 3 params
+    # if we find a match, then we can populate the posts from our database instead of making an api call
+
+    # Tricks:
+    # The tags array is 
+    
 
 
     if (tags.empty?)
@@ -38,7 +47,7 @@ class ServerController < ApplicationController
     valid_directions = ["asc", "desc"]
     if (!valid_directions.include?(direction))
       return json_response({
-        "error": "direction parameter is invalid. Try: asc, desc"
+        "error": "Direction parameter is invalid. Try: asc, desc"
         }, 400)
     end
 
@@ -56,6 +65,11 @@ class ServerController < ApplicationController
       end
     end
 
+    if unique_posts.empty?
+      return json_response({
+        "message": "Couldn't find any posts for those parameters. Try: /api/posts?tags=tech&sortBy=likes"
+        }, 404)
+    end
 
     unique_posts.map { |k,v| response.push(v) }
     response = response.sort_by { |post| post["#{sort_by}"]}

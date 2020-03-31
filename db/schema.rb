@@ -10,7 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_03_25_215210) do
+ActiveRecord::Schema.define(version: 2020_03_31_224144) do
+
+  create_table "cached_results", force: :cascade do |t|
+    t.integer "post_id"
+    t.integer "cached_search_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "cached_searches", force: :cascade do |t|
+    t.text "searchString"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
 
   create_table "posts", force: :cascade do |t|
     t.text "author"

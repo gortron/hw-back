@@ -7,6 +7,8 @@
 #   Character.create(name: 'Luke', movie: movies.first)
 
 Post.destroy_all
+CachedSearch.destroy_all
+CachedResult.destroy_all
 
 data = {
   author: "Elisha Friedman",
@@ -22,4 +24,17 @@ data = {
   ]
 }
 
-Post.create(data)
+post = Post.create(data)
+
+# search = {
+#   sort_by: "id",
+#   direction: "asc",
+#   tags: ["history", "science"],
+#   post_origin_ids: [4]
+# }
+
+search = {searchString: "http://localhost:3000/api/posts?tags=history,tech&sortBy=popularity"}
+
+cached_search = CachedSearch.create(search)
+
+CachedResult.create(post_id: post.id, cached_search_id: cached_search.id)
