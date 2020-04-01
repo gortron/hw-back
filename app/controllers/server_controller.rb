@@ -31,13 +31,12 @@ class ServerController < ApplicationController
       response = get_cached_results(cached)
       # Order our response based on query params
 
-      response = response.sort_by { |post| post[:"#{sort_by}"]}
     # If there's no cached search, then cache current search & make external calls
     else
       response = create_results(tags, endpoint, sanitized_search)
-      response = response.sort_by { |post| post["#{sort_by}"]}
     end   
 
+    response = response.sort_by { |post| post[:"#{sort_by}"]}
     if (direction === "desc") 
       response = response.reverse
     end
@@ -110,10 +109,13 @@ class ServerController < ApplicationController
     end
 
     # Restructure data from external APi to fit app db
-    unique_posts.each do |k,v| 
-      new_post = Post.create(author: v["author"], author_id: v["authorId"], origin_id: v["id"], likes: v["likes"], popularity: v["popularity"], reads: v["reads"], tags: v["tags"])
-      CachedResult.create(cached_search_id: new_search.id, post_id: new_post.id)
-      response.push(v) 
+    unique_posts.each do |origin_id, post_data| 
+      post = Post.create_with(author: post_data["author"], author_id: post_data["authorId"], likes: post_data["likes"], popularity: post_data["popularity"].to_f, reads: post_data["reads"], tags: post_data["tags"]).find_or_create_by(origin_id: origin_id)
+      CachedResult.create(cached_search_id: new_search.id, post_id: post.id)
+
+      structured_post = {author: post.author, author_id: post.author_id, id: post.origin_id, likes: post.likes, popularity: post.popularity, reads: post.reads, tags: JSON.parse(post.tags)}
+
+      response.push(structured_post) 
     end
 
     return response

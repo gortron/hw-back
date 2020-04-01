@@ -30,7 +30,7 @@ ActiveRecord::Schema.define(version: 2020_03_31_224144) do
     t.integer "author_id"
     t.integer "origin_id"
     t.integer "likes"
-    t.decimal "popularity"
+    t.float "popularity"
     t.integer "reads"
     t.text "tags"
     t.datetime "created_at", precision: 6, null: false
