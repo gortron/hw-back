@@ -12,8 +12,8 @@ CachedResult.destroy_all
 
 data = {
   author: "Elisha Friedman",
-  authorId: 8,
-  originId: 4,
+  author_id: 8,
+  origin_id: 4,
   likes: 728,
   popularity: 0.88,
   reads: 19645,
@@ -33,7 +33,7 @@ post = Post.create(data)
 #   post_origin_ids: [4]
 # }
 
-search = {searchString: "http://localhost:3000/api/posts?tags=history,tech&sortBy=popularity"}
+search = {search_string: "http://localhost:3000/api/posts?tags=history,tech&sortBy=popularity"}
 
 cached_search = CachedSearch.create(search)
 

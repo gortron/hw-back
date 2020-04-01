@@ -2,8 +2,8 @@ class CreatePosts < ActiveRecord::Migration[6.0]
   def change
     create_table :posts do |t|
       t.text :author
-      t.integer :authorId
-      t.integer :originId
+      t.integer :author_id
+      t.integer :origin_id
       t.integer :likes
       t.decimal :popularity
       t.integer :reads

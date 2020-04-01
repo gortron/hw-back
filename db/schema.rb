@@ -20,15 +20,15 @@ ActiveRecord::Schema.define(version: 2020_03_31_224144) do
   end
 
   create_table "cached_searches", force: :cascade do |t|
-    t.text "searchString"
+    t.text "search_string"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "posts", force: :cascade do |t|
     t.text "author"
-    t.integer "authorId"
-    t.integer "originId"
+    t.integer "author_id"
+    t.integer "origin_id"
     t.integer "likes"
     t.decimal "popularity"
     t.integer "reads"

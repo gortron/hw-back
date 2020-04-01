@@ -22,15 +22,6 @@ class ServerController < ApplicationController
     sort_by = queries["sortBy"].first || "id"
     direction = queries["direction"].first || "asc"
 
-    # At this point, we can check if this search has been cached
-    # We'll need to look through the DB of cached search terms and make a match on all 3 params
-    # if we find a match, then we can populate the posts from our database instead of making an api call
-
-    # Tricks:
-    # The tags array is 
-    
-
-
     if (tags.empty?)
       return json_response({"error": "Tags parameter is required"}, 400)
     else
@@ -54,24 +45,58 @@ class ServerController < ApplicationController
     endpoint = 'http://hatchways.io/api/assessment/blog/posts?'
     response = [];
     unique_posts = {};
-    tags.each do |tag|
-      target = endpoint + "tag=" + tag
-      data = JSON.parse(RestClient.get(target))
 
-      data["posts"].each do |post|
-        if !unique_posts.key?(:post["id"]) 
-          unique_posts[post["id"]] = post
+      #     author: "Elisha Friedman",
+  # author_id: 8,
+  # origin_id: 4,
+  # likes: 728,
+  # popularity: 0.88,
+  # reads: 19645,
+  # tags: [
+  #   "science",
+  #   "design",
+  #   "tech"
+  # ]
+
+    sorted_tag_string = tags.sort.join(",")
+    sanitized_search = "#{endpoint}tags=#{sorted_tag_string}"
+    if (cached = CachedSearch.find_by(search_string: sanitized_search))
+      posts = cached.posts
+      posts.each do |post|
+        structured_post = {author: post.author, author_id: post.author_id, id: post.origin_id, likes: post.likes, popularity: post.popularity, reads: post.reads, tags: JSON.parse(post.tags)}
+        response.push(structured_post)
+        # post["tags"] = JSON.parse(post["tags"])
+        # post.delete(:created_at)
+        # post.delete(:updated_at)
+      end
+    else
+      new_search = CachedSearch.create(search_string: sanitized_search)
+      tags.each do |tag|
+        target = endpoint + "tag=" + tag
+        data = JSON.parse(RestClient.get(target))
+  
+        data["posts"].each do |post|
+          if !unique_posts.key?(:post["id"]) 
+            unique_posts[post["id"]] = post
+          end
         end
       end
-    end
+  
+      if unique_posts.empty?
+        return json_response({
+          "message": "Couldn't find any posts for those parameters. Try: /api/posts?tags=tech&sortBy=likes"
+          }, 404)
+      end
 
-    if unique_posts.empty?
-      return json_response({
-        "message": "Couldn't find any posts for those parameters. Try: /api/posts?tags=tech&sortBy=likes"
-        }, 404)
-    end
 
-    unique_posts.map { |k,v| response.push(v) }
+  
+      unique_posts.each do |k,v| 
+        new_post = Post.create(author: v["author"], author_id: v["authorId"], origin_id: v["id"], likes: v["likes"], popularity: v["popularity"], reads: v["reads"], tags: v["tags"])
+        CachedResult.create(cached_search_id: new_search.id, post_id: new_post.id)
+        response.push(v) 
+      end
+    end   
+    
     response = response.sort_by { |post| post["#{sort_by}"]}
     if (direction === "desc") 
       response = response.reverse
