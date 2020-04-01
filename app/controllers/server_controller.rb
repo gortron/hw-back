@@ -46,28 +46,20 @@ class ServerController < ApplicationController
     response = [];
     unique_posts = {};
 
-      #     author: "Elisha Friedman",
-  # author_id: 8,
-  # origin_id: 4,
-  # likes: 728,
-  # popularity: 0.88,
-  # reads: 19645,
-  # tags: [
-  #   "science",
-  #   "design",
-  #   "tech"
-  # ]
-
     sorted_tag_string = tags.sort.join(",")
     sanitized_search = "#{endpoint}tags=#{sorted_tag_string}"
-    if (cached = CachedSearch.find_by(search_string: sanitized_search))
+    cached = CachedSearch.find_by(search_string: sanitized_search) || nil
+
+    if (cached && (Time.now - cached[:created_at] < 72*60*60))
       posts = cached.posts
       posts.each do |post|
         structured_post = {author: post.author, author_id: post.author_id, id: post.origin_id, likes: post.likes, popularity: post.popularity, reads: post.reads, tags: JSON.parse(post.tags)}
         response.push(structured_post)
-        # post["tags"] = JSON.parse(post["tags"])
-        # post.delete(:created_at)
-        # post.delete(:updated_at)
+      end
+      # when we read, response interprets post[:sort_by]
+      response = response.sort_by { |post| post[:"#{sort_by}"]}
+      if (direction === "desc") 
+        response = response.reverse
       end
     else
       new_search = CachedSearch.create(search_string: sanitized_search)
@@ -88,19 +80,18 @@ class ServerController < ApplicationController
           }, 404)
       end
 
-
-  
       unique_posts.each do |k,v| 
         new_post = Post.create(author: v["author"], author_id: v["authorId"], origin_id: v["id"], likes: v["likes"], popularity: v["popularity"], reads: v["reads"], tags: v["tags"])
         CachedResult.create(cached_search_id: new_search.id, post_id: new_post.id)
         response.push(v) 
       end
+
+      # when we write, response interprets post["sort_by"]
+      response = response.sort_by { |post| post["#{sort_by}"]}
+      if (direction === "desc") 
+        response = response.reverse
+      end
     end   
-    
-    response = response.sort_by { |post| post["#{sort_by}"]}
-    if (direction === "desc") 
-      response = response.reverse
-    end
 
     return json_response(response)
   end
