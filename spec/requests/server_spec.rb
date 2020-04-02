@@ -32,5 +32,37 @@ RSpec.describe 'API', type: :request do
       end
     end
 
+    context 'when request is invalid: no query' do
+      before { get '/api/posts' }
+
+      it 'returns status code 400' do
+        expect(response).to have_http_status(400)
+      end
+    end
+
+    context 'when request is invalid: empty queries' do
+      before { get '/api/posts?' }
+
+      it 'returns status code 400' do
+        expect(response).to have_http_status(400)
+      end
+    end
+
+    # context 'when request is valid but tags are invalid' do
+    #   before { get '/api/posts?tags=' }
+
+    #   it 'returns status code 400' do
+    #     expect(response).to have_http_status(400)
+    #   end
+    # end
+
+    context 'when request is valid but tags have no results' do
+      before { get '/api/posts?tags=test_tag1,test_tag2' }
+
+      it 'returns status code 404' do
+        expect(response).to have_http_status(404)
+      end
+    end
+
   end
 end

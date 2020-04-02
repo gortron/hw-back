@@ -13,6 +13,5 @@ RSpec.describe Post, type: :model do
   it { should validate_presence_of(:popularity) }
   it { should validate_presence_of(:reads) }
   it { should validate_presence_of(:tags) }
-  it { should validate_presence_of(:created_at) }
-  it { should validate_presence_of(:updated_at) }
+  
 end

@@ -34,6 +34,10 @@ class ServerController < ApplicationController
     # If there's no cached search, then cache current search & make external calls
     else
       response = create_results(tags, endpoint, sanitized_search)
+      # Check if create_results returns a no results message
+      if (response.size == 1 && response.first.first == :message) 
+        return json_response(response, 404)
+      end
     end   
 
     response = response.sort_by { |post| post[:"#{sort_by}"]}
@@ -102,10 +106,7 @@ class ServerController < ApplicationController
 
     if unique_posts.empty?
       CachedSearch.last.destroy
-      return json_response({
-        "message": "Couldn't find any posts for those parameters. Try: /api/posts?tags=tech&sortBy=likes"
-        }, 404)
-        
+      return {"message": "Couldn't find any posts for those parameters. Try: /api/posts?tags=tech&sortBy=likes"}
     end
 
     # Restructure data from external APi to fit app db

@@ -8,6 +8,4 @@ RSpec.describe CachedResult, type: :model do
   # Validation tests
   it { should validate_presence_of(:post_id) }
   it { should validate_presence_of(:cached_search_id) }
-  it { should validate_presence_of(:created_at) }
-  it { should validate_presence_of(:updated_at) }
 end
