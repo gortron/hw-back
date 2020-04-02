@@ -32,6 +32,14 @@ RSpec.describe 'API', type: :request do
       end
     end
 
+    context 'when request is valid but tags have no results' do
+      before { get '/api/posts?tags=test_tag1,test_tag2' }
+
+      it 'returns status code 404' do
+        expect(response).to have_http_status(404)
+      end
+    end
+
     context 'when request is invalid: no query' do
       before { get '/api/posts' }
 
@@ -48,19 +56,19 @@ RSpec.describe 'API', type: :request do
       end
     end
 
-    # context 'when request is valid but tags are invalid' do
-    #   before { get '/api/posts?tags=' }
+    context 'when request is invalid: direction invalid' do
+      before { get '/api/posts?tags=history&direction=as' }
 
-    #   it 'returns status code 400' do
-    #     expect(response).to have_http_status(400)
-    #   end
-    # end
+      it 'returns status code 400' do
+        expect(response).to have_http_status(400)
+      end
+    end
 
-    context 'when request is valid but tags have no results' do
-      before { get '/api/posts?tags=test_tag1,test_tag2' }
+    context 'when request is invalid: sortBy invalid' do
+      before { get '/api/posts?tags=history&sortBy=taste' }
 
-      it 'returns status code 404' do
-        expect(response).to have_http_status(404)
+      it 'returns status code 400' do
+        expect(response).to have_http_status(400)
       end
     end
 

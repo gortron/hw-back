@@ -19,7 +19,10 @@ class ServerController < ApplicationController
       return json_response({"error": "Queries must be provided. Try: /api/posts?tags=tech&sortBy=likes"}, 400)
     end
 
-    validate_post_params(tags, sort_by, direction)    
+    any_errors = check_params_for_errors(tags, sort_by, direction)
+    if any_errors
+      return json_response(any_errors, 400)
+    end
 
     endpoint = 'http://hatchways.io/api/assessment/blog/posts?'
     sorted_tag_string = tags.sort.join(",")
@@ -53,25 +56,25 @@ class ServerController < ApplicationController
     params.permit(:tags, :sortBy, :direction)
   end
 
-  def validate_post_params(tags, sort_by, direction)
+  def check_params_for_errors(tags, sort_by, direction)
     if (tags.empty?)
-      return json_response({"error": "Tags parameter is required"}, 400)
+      return error = {"error": "Tags parameter is required"}
     else
       tags = tags.first.split(",")
     end
 
     valid_sorts = ["author", "authorId", "id","likes", "popularity", "reads"]
     if (!valid_sorts.include?(sort_by))
-      return json_response({
+      return error = {
         "error": "sortBy parameter is invalid. Try: id, author, authorId, likes, popularity, reads"
-        }, 400)
+        }
     end
     
     valid_directions = ["asc", "desc"]
     if (!valid_directions.include?(direction))
-      return json_response({
+      return error = {
         "error": "Direction parameter is invalid. Try: asc, desc"
-        }, 400)
+        }
     end
   end
 

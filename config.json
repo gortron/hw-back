@@ -1,0 +1,5 @@
+{
+  "install": "bundle install",
+  "run": "rails server",
+  "port": 3000
+}
